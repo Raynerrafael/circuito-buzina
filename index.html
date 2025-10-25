@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Circuito Elétrico Interativo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #0a1929 0%, #1e3a5f 100%);
+            color: white;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        h1 {
+            font-size: 3em;
+            color: #4fc3f7;
+            text-shadow: 0 0 20px rgba(79, 195, 247, 0.5);
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            font-size: 1.2em;
+            color: #b3e5fc;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 25px;
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(79, 195, 247, 0.3);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(79, 195, 247, 0.3);
+        }
+
+        .card h2 {
+            color: #4fc3f7;
+            margin-bottom: 15px;
+            font-size: 1.8em;
+        }
+
+        .card p {
+            line-height: 1.6;
+            color: #e1f5fe;
+        }
+
+        .circuit-demo {
+            grid-column: 1 / -1;
+            background: rgba(255, 255, 255, 0.15);
+            border: 3px solid #4fc3f7;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .circuit-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin: 30px auto;
+            height: 400px;
+        }
+
+        .circuit-svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .wire {
+            stroke: #4fc3f7;
+            stroke-width: 4;
+            fill: none;
+        }
+
+        .wire.active {
+            stroke: #00e676;
+            filter: drop-shadow(0 0 10px #00e676);
+            animation: pulse 0.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        .battery {
+            fill: #4fc3f7;
+            stroke: white;
+            stroke-width: 2;
+        }
+
+        .buzzer {
+            fill: #ff9800;
+            stroke: white;
+            stroke-width: 2;
+        }
+
+        .buzzer.active {
+            fill: #ffd54f;
+            filter: drop-shadow(0 0 15px #ff9800);
+        }
+
+        .switch-btn {
+            background: linear-gradient(135deg, #1976d2, #4fc3f7);
+            border: none;
+            color: white;
+            font-size: 1.5em;
+            padding: 20px 50px;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 5px 20px rgba(79, 195, 247, 0.4);
+            font-weight: bold;
+            margin-top: 20px;
+        }
+
+        .switch-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 30px rgba(79, 195, 247, 0.6);
+        }
+
+        .switch-btn:active {
+            transform: scale(0.95);
+        }
+
+        .switch-btn.on {
+            background: linear-gradient(135deg, #00c853, #69f0ae);
+            box-shadow: 0 5px 20px rgba(0, 230, 118, 0.4);
+        }
+
+        .status {
+            font-size: 1.3em;
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .status.on {
+            color: #69f0ae;
+            text-shadow: 0 0 10px rgba(105, 240, 174, 0.5);
+        }
+
+        .components-list {
+            grid-column: 1 / -1;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .component {
+            background: linear-gradient(135deg, rgba(79, 195, 247, 0.2), rgba(79, 195, 247, 0.05));
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #4fc3f7;
+        }
+
+        .component h3 {
+            color: #4fc3f7;
+            margin-bottom: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>⚡ Circuito Elétrico Interativo ⚡</h1>
+            <p class="subtitle">Explore o funcionamento de um circuito com buzina</p>
+        </header>
+
+        <div class="content-grid">
+            <div class="card">
+                <h2>🔋 O que é um Circuito Elétrico?</h2>
+                <p>Um circuito elétrico é um caminho fechado por onde a corrente elétrica pode fluir. Ele é composto por uma fonte de energia (bateria), condutores (fios) e componentes que utilizam a energia, como lâmpadas, motores ou buzinas.</p>
+            </div>
+
+            <div class="card">
+                <h2>⚙️ Como Funciona?</h2>
+                <p>Quando o interruptor é fechado, a corrente elétrica flui da bateria através dos fios até a buzina, fazendo-a emitir som. Quando o interruptor é aberto, o circuito é interrompido e a buzina para de funcionar.</p>
+            </div>
+
+            <div class="card circuit-demo">
+                <h2>🎵 Experimente o Circuito!</h2>
+                <p style="margin-bottom: 20px;">Clique no botão para ligar/desligar o circuito e ativar a buzina</p>
+                
+                <div class="circuit-container">
+                    <svg class="circuit-svg" viewBox="0 0 600 400">
+                        <!-- Fios do circuito -->
+                        <path id="wire1" class="wire" d="M 100 100 L 300 100" />
+                        <path id="wire2" class="wire" d="M 300 100 L 500 100" />
+                        <path id="wire3" class="wire" d="M 500 100 L 500 300" />
+                        <path id="wire4" class="wire" d="M 500 300 L 100 300" />
+                        <path id="wire5" class="wire" d="M 100 300 L 100 100" />
+                        
+                        <!-- Bateria -->
+                        <g class="battery">
+                            <rect x="80" y="180" width="40" height="80" rx="5" />
+                            <text x="100" y="225" text-anchor="middle" fill="white" font-size="14">+</text>
+                            <text x="100" y="245" text-anchor="middle" fill="white" font-size="12">9V</text>
+                        </g>
+                        
+                        <!-- Interruptor -->
+                        <g id="switch">
+                            <circle cx="300" cy="100" r="8" fill="white" stroke="#4fc3f7" stroke-width="2" />
+                            <line id="switchLine" x1="300" y1="100" x2="340" y2="80" stroke="white" stroke-width="4" stroke-linecap="round" />
+                            <circle cx="340" cy="100" r="8" fill="white" stroke="#4fc3f7" stroke-width="2" />
+                        </g>
+                        
+                        <!-- Buzina -->
+                        <g id="buzzer" class="buzzer">
+                            <circle cx="500" cy="200" r="50" />
+                            <path d="M 480 200 L 500 180 L 500 220 Z" fill="white" />
+                            <text x="500" y="270" text-anchor="middle" fill="white" font-size="16">BUZINA</text>
+                        </g>
+                    </svg>
+                </div>
+
+                <button id="switchBtn" class="switch-btn">LIGAR CIRCUITO</button>
+                <div id="status" class="status">Circuito: DESLIGADO</div>
+            </div>
+
+            <div class="components-list">
+                <div class="component">
+                    <h3>🔋 Bateria</h3>
+                    <p>Fornece a energia elétrica necessária para o funcionamento do circuito. Converte energia química em energia elétrica.</p>
+                </div>
+                <div class="component">
+                    <h3>🔌 Fios Condutores</h3>
+                    <p>Permitem a passagem da corrente elétrica, conectando todos os componentes do circuito.</p>
+                </div>
+                <div class="component">
+                    <h3>🔘 Interruptor</h3>
+                    <p>Controla o fluxo de corrente, permitindo ligar ou desligar o circuito quando necessário.</p>
+                </div>
+                <div class="component">
+                    <h3>📢 Buzina</h3>
+                    <p>Converte energia elétrica em energia sonora, emitindo um som quando a corrente passa por ela.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let isOn = false;
+        const switchBtn = document.getElementById('switchBtn');
+        const status = document.getElementById('status');
+        const wires = document.querySelectorAll('.wire');
+        const buzzer = document.getElementById('buzzer');
+        const switchLine = document.getElementById('switchLine');
+        
+        // Contexto de áudio
+        let audioContext;
+        let oscillator;
+        let gainNode;
+
+        function initAudio() {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        function startBuzzer() {
+            initAudio();
+            
+            oscillator = audioContext.createOscillator();
+            gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.value = 800;
+            oscillator.type = 'square';
+            
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            
+            oscillator.start();
+        }
+
+        function stopBuzzer() {
+            if (oscillator) {
+                oscillator.stop();
+                oscillator = null;
+            }
+        }
+
+        switchBtn.addEventListener('click', () => {
+            isOn = !isOn;
+            
+            if (isOn) {
+                // Ligar circuito
+                switchBtn.textContent = 'DESLIGAR CIRCUITO';
+                switchBtn.classList.add('on');
+                status.textContent = 'Circuito: LIGADO - Buzina tocando! 🔊';
+                status.classList.add('on');
+                
+                // Animar fios
+                wires.forEach(wire => wire.classList.add('active'));
+                buzzer.classList.add('active');
+                
+                // Animar interruptor
+                switchLine.setAttribute('x2', '340');
+                switchLine.setAttribute('y2', '100');
+                
+                // Tocar som da buzina
+                startBuzzer();
+                
+            } else {
+                // Desligar circuito
+                switchBtn.textContent = 'LIGAR CIRCUITO';
+                switchBtn.classList.remove('on');
+                status.textContent = 'Circuito: DESLIGADO';
+                status.classList.remove('on');
+                
+                // Desanimar fios
+                wires.forEach(wire => wire.classList.remove('active'));
+                buzzer.classList.remove('active');
+                
+                // Desanimar interruptor
+                switchLine.setAttribute('x2', '340');
+                switchLine.setAttribute('y2', '80');
+                
+                // Parar som da buzina
+                stopBuzzer();
+            }
+        });
+    </script>
+</body>
+</html>
